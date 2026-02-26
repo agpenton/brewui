@@ -1,6 +1,6 @@
 {
-  "name": "brewui",
-  "version": "0.1.0",
+  "name": "@agpenton/brewui",
+  "version": "0.1.1",
   "private": false,
   "description": "Terminal UI for Brewfile inventory and package operations",
   "type": "module",
