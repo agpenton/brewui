@@ -32,6 +32,12 @@ Ghostty note:
 - `pnpm start` run compiled app
 - `pnpm test` run tests
 
+## Publishing
+
+- GitHub Actions workflow: `.github/workflows/publish.yml`
+- Triggered on tags matching `v*` (example: `v0.1.1`) or manual run (`workflow_dispatch`)
+- Required repository secret: `NPM_TOKEN` (npm automation token with publish access)
+
 ## Keybindings
 
 - `d` dump Brewfile (`brew bundle dump --force`)

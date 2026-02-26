@@ -1,9 +1,16 @@
 {
   "name": "brewui",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Terminal UI for Brewfile inventory and package operations",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "brewui": "dist/cli.js"
   },
