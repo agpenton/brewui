@@ -62,6 +62,28 @@ describe("BrewService commands", () => {
     });
   });
 
+  it("runs update then upgrade for all packages", async () => {
+    const runner = new FakeRunner((cmd, args) => {
+      if (cmd === "brew" && args[0] === "update") {
+        return { code: 0, stdout: "updated", stderr: "" };
+      }
+      if (cmd === "brew" && args[0] === "upgrade") {
+        return { code: 0, stdout: "upgraded", stderr: "" };
+      }
+      return { code: 1, stdout: "", stderr: "unexpected command" };
+    });
+    const service = new BrewService(runner);
+
+    const output = await service.updateAndUpgradeAll();
+
+    expect(runner.calls).toEqual([
+      { cmd: "brew", args: ["update"] },
+      { cmd: "brew", args: ["upgrade"] }
+    ]);
+    expect(output).toContain("updated");
+    expect(output).toContain("upgraded");
+  });
+
   it("maps source info to brew info", async () => {
     const runner = new FakeRunner(() => ({ code: 0, stdout: "info", stderr: "" }));
     const service = new BrewService(runner);

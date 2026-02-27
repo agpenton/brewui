@@ -47,4 +47,5 @@ Ghostty note:
 - `enter` fetch selected item source info (`brew info` / `mas info`)
 - `x` delete selected package (confirmation required)
 - `c` run `brew cleanup` (confirmation required)
+- `u` run `brew update` + `brew upgrade` for all packages (confirmation required)
 - `q` quit

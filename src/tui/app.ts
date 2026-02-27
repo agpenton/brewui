@@ -78,7 +78,7 @@ export class BrewTuiApp {
     border: "line",
     tags: false,
     content:
-      "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  q:quit"
+      "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit"
   });
 
   private readonly question = blessed.question({
@@ -149,6 +149,10 @@ export class BrewTuiApp {
 
     this.screen.key(["c"], async () => {
       await this.safeCleanup();
+    });
+
+    this.screen.key(["u"], async () => {
+      await this.safeUpdateAndUpgrade();
     });
 
     this.screen.key(["/"], async () => {
@@ -299,6 +303,25 @@ export class BrewTuiApp {
     }
   }
 
+  private async safeUpdateAndUpgrade(): Promise<void> {
+    const confirmed = await this.confirm("Run brew update and brew upgrade for all packages?");
+    if (!confirmed) {
+      this.setStatus("Update/upgrade canceled.");
+      this.screen.render();
+      return;
+    }
+
+    try {
+      this.setStatus("Running brew update...");
+      const output = await this.service.updateAndUpgradeAll();
+      this.sourceInfo.setContent(output || "(no output)");
+      this.setStatus("Update/upgrade complete. Refreshing list...");
+      await this.safeRefresh(this.selectedIndex());
+    } catch (error) {
+      this.onError(error);
+    }
+  }
+
   private async askFilter(): Promise<void> {
     const input = await this.promptInput("Filter by name", this.filterText);
     if (input === null) {
@@ -362,7 +385,7 @@ export class BrewTuiApp {
   private setStatus(message: string): void {
     const debugHint = this.options.debug ? "  [debug]" : "";
     this.footer.setContent(
-      `d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  q:quit\n${message}${debugHint}`
+      `d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit\n${message}${debugHint}`
     );
   }
 
