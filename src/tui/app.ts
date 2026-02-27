@@ -6,6 +6,9 @@ interface AppOptions {
   debug?: boolean;
 }
 
+const FOOTER_HELP_TEXT =
+  "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit";
+
 export class BrewTuiApp {
   private readonly screen = blessed.screen({
     smartCSR: true,
@@ -77,8 +80,7 @@ export class BrewTuiApp {
     height: "8%",
     border: "line",
     tags: false,
-    content:
-      "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit"
+    content: FOOTER_HELP_TEXT
   });
 
   private readonly question = blessed.question({
@@ -314,9 +316,11 @@ export class BrewTuiApp {
     try {
       this.setStatus("Running brew update...");
       const output = await this.service.updateAndUpgradeAll();
-      this.sourceInfo.setContent(output || "(no output)");
       this.setStatus("Update/upgrade complete. Refreshing list...");
       await this.safeRefresh(this.selectedIndex());
+      this.sourceInfo.setContent(output || "(no output)");
+      this.setStatus("Update/upgrade complete.");
+      this.screen.render();
     } catch (error) {
       this.onError(error);
     }
@@ -384,9 +388,7 @@ export class BrewTuiApp {
 
   private setStatus(message: string): void {
     const debugHint = this.options.debug ? "  [debug]" : "";
-    this.footer.setContent(
-      `d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit\n${message}${debugHint}`
-    );
+    this.footer.setContent(`${FOOTER_HELP_TEXT}\n${message}${debugHint}`);
   }
 
   private onError(error: unknown): void {

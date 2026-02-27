@@ -84,6 +84,40 @@ describe("BrewService commands", () => {
     expect(output).toContain("upgraded");
   });
 
+  it("throws and stops before upgrade when update fails", async () => {
+    const runner = new FakeRunner((cmd, args) => {
+      if (cmd === "brew" && args[0] === "update") {
+        return { code: 1, stdout: "", stderr: "update failed" };
+      }
+      return { code: 1, stdout: "", stderr: "unexpected command after failed update" };
+    });
+    const service = new BrewService(runner);
+
+    await expect(service.updateAndUpgradeAll()).rejects.toThrow(/update/i);
+
+    expect(runner.calls).toEqual([{ cmd: "brew", args: ["update"] }]);
+  });
+
+  it("throws when upgrade fails and does not run further commands", async () => {
+    const runner = new FakeRunner((cmd, args) => {
+      if (cmd === "brew" && args[0] === "update") {
+        return { code: 0, stdout: "updated", stderr: "" };
+      }
+      if (cmd === "brew" && args[0] === "upgrade") {
+        return { code: 1, stdout: "", stderr: "upgrade failed" };
+      }
+      return { code: 1, stdout: "", stderr: "unexpected command after failed upgrade" };
+    });
+    const service = new BrewService(runner);
+
+    await expect(service.updateAndUpgradeAll()).rejects.toThrow(/upgrade/i);
+
+    expect(runner.calls).toEqual([
+      { cmd: "brew", args: ["update"] },
+      { cmd: "brew", args: ["upgrade"] }
+    ]);
+  });
+
   it("maps source info to brew info", async () => {
     const runner = new FakeRunner(() => ({ code: 0, stdout: "info", stderr: "" }));
     const service = new BrewService(runner);
