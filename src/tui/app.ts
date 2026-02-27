@@ -6,6 +6,9 @@ interface AppOptions {
   debug?: boolean;
 }
 
+const FOOTER_HELP_TEXT =
+  "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:brew update+upgrade  q:quit";
+
 export class BrewTuiApp {
   private readonly screen = blessed.screen({
     smartCSR: true,
@@ -77,8 +80,7 @@ export class BrewTuiApp {
     height: "8%",
     border: "line",
     tags: false,
-    content:
-      "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  q:quit"
+    content: FOOTER_HELP_TEXT
   });
 
   private readonly question = blessed.question({
@@ -149,6 +151,10 @@ export class BrewTuiApp {
 
     this.screen.key(["c"], async () => {
       await this.safeCleanup();
+    });
+
+    this.screen.key(["u"], async () => {
+      await this.safeUpdateAndUpgrade();
     });
 
     this.screen.key(["/"], async () => {
@@ -299,6 +305,27 @@ export class BrewTuiApp {
     }
   }
 
+  private async safeUpdateAndUpgrade(): Promise<void> {
+    const confirmed = await this.confirm("Run brew update and brew upgrade for Homebrew packages?");
+    if (!confirmed) {
+      this.setStatus("Update/upgrade canceled.");
+      this.screen.render();
+      return;
+    }
+
+    try {
+      this.setStatus("Running brew update...");
+      const output = await this.service.updateAndUpgradeHomebrew();
+      this.setStatus("Update/upgrade complete. Refreshing list...");
+      await this.safeRefresh(this.selectedIndex());
+      this.sourceInfo.setContent(output || "(no output)");
+      this.setStatus("Homebrew update/upgrade complete.");
+      this.screen.render();
+    } catch (error) {
+      this.onError(error);
+    }
+  }
+
   private async askFilter(): Promise<void> {
     const input = await this.promptInput("Filter by name", this.filterText);
     if (input === null) {
@@ -361,9 +388,7 @@ export class BrewTuiApp {
 
   private setStatus(message: string): void {
     const debugHint = this.options.debug ? "  [debug]" : "";
-    this.footer.setContent(
-      `d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  q:quit\n${message}${debugHint}`
-    );
+    this.footer.setContent(`${FOOTER_HELP_TEXT}\n${message}${debugHint}`);
   }
 
   private onError(error: unknown): void {

@@ -88,6 +88,23 @@ export class BrewService {
 
     return result.stdout || "brew cleanup complete";
   }
+
+  async updateAndUpgradeHomebrew(): Promise<string> {
+    const updateResult = await this.runner.run("brew", ["update"]);
+    if (updateResult.code !== 0) {
+      throw new Error(updateResult.stderr || "brew update failed");
+    }
+
+    const upgradeResult = await this.runner.run("brew", ["upgrade"]);
+    if (upgradeResult.code !== 0) {
+      throw new Error(upgradeResult.stderr || "brew upgrade failed");
+    }
+
+    return [updateResult.stdout, upgradeResult.stdout]
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0)
+      .join("\n\n") || "Homebrew update and upgrade complete";
+  }
 }
 
 function detailsCommand(item: BrewItem): [string, string[]] {
