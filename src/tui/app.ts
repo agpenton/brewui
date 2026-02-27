@@ -7,7 +7,7 @@ interface AppOptions {
 }
 
 const FOOTER_HELP_TEXT =
-  "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:update+upgrade  q:quit";
+  "d:dump  r:refresh  /:filter  enter:info  x:delete  c:cleanup  u:brew update+upgrade  q:quit";
 
 export class BrewTuiApp {
   private readonly screen = blessed.screen({
@@ -306,7 +306,7 @@ export class BrewTuiApp {
   }
 
   private async safeUpdateAndUpgrade(): Promise<void> {
-    const confirmed = await this.confirm("Run brew update and brew upgrade for all packages?");
+    const confirmed = await this.confirm("Run brew update and brew upgrade for Homebrew packages?");
     if (!confirmed) {
       this.setStatus("Update/upgrade canceled.");
       this.screen.render();
@@ -315,11 +315,11 @@ export class BrewTuiApp {
 
     try {
       this.setStatus("Running brew update...");
-      const output = await this.service.updateAndUpgradeAll();
+      const output = await this.service.updateAndUpgradeHomebrew();
       this.setStatus("Update/upgrade complete. Refreshing list...");
       await this.safeRefresh(this.selectedIndex());
       this.sourceInfo.setContent(output || "(no output)");
-      this.setStatus("Update/upgrade complete.");
+      this.setStatus("Homebrew update/upgrade complete.");
       this.screen.render();
     } catch (error) {
       this.onError(error);

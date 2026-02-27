@@ -62,7 +62,7 @@ describe("BrewService commands", () => {
     });
   });
 
-  it("runs update then upgrade for all packages", async () => {
+  it("runs update then upgrade for Homebrew packages", async () => {
     const runner = new FakeRunner((cmd, args) => {
       if (cmd === "brew" && args[0] === "update") {
         return { code: 0, stdout: "updated", stderr: "" };
@@ -74,7 +74,7 @@ describe("BrewService commands", () => {
     });
     const service = new BrewService(runner);
 
-    const output = await service.updateAndUpgradeAll();
+    const output = await service.updateAndUpgradeHomebrew();
 
     expect(runner.calls).toEqual([
       { cmd: "brew", args: ["update"] },
@@ -93,7 +93,7 @@ describe("BrewService commands", () => {
     });
     const service = new BrewService(runner);
 
-    await expect(service.updateAndUpgradeAll()).rejects.toThrow(/update/i);
+    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow(/update/i);
 
     expect(runner.calls).toEqual([{ cmd: "brew", args: ["update"] }]);
   });
@@ -110,7 +110,7 @@ describe("BrewService commands", () => {
     });
     const service = new BrewService(runner);
 
-    await expect(service.updateAndUpgradeAll()).rejects.toThrow(/upgrade/i);
+    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow(/upgrade/i);
 
     expect(runner.calls).toEqual([
       { cmd: "brew", args: ["update"] },

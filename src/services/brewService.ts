@@ -89,7 +89,7 @@ export class BrewService {
     return result.stdout || "brew cleanup complete";
   }
 
-  async updateAndUpgradeAll(): Promise<string> {
+  async updateAndUpgradeHomebrew(): Promise<string> {
     const updateResult = await this.runner.run("brew", ["update"]);
     if (updateResult.code !== 0) {
       throw new Error(updateResult.stderr || "brew update failed");
@@ -103,7 +103,7 @@ export class BrewService {
     return [updateResult.stdout, upgradeResult.stdout]
       .map((part) => part.trim())
       .filter((part) => part.length > 0)
-      .join("\n\n") || "brew update and upgrade complete";
+      .join("\n\n") || "Homebrew update and upgrade complete";
   }
 }
 
