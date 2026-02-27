@@ -93,7 +93,7 @@ describe("BrewService commands", () => {
     });
     const service = new BrewService(runner);
 
-    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow(/update/i);
+    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow("update failed");
 
     expect(runner.calls).toEqual([{ cmd: "brew", args: ["update"] }]);
   });
@@ -110,7 +110,7 @@ describe("BrewService commands", () => {
     });
     const service = new BrewService(runner);
 
-    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow(/upgrade/i);
+    await expect(service.updateAndUpgradeHomebrew()).rejects.toThrow("upgrade failed");
 
     expect(runner.calls).toEqual([
       { cmd: "brew", args: ["update"] },
